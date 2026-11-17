@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -315,6 +316,12 @@ func parseAvailableEnv() map[string]string {
 
 func main() {
 	flag.Parse()
+
+	// Keep analysis within RAM on 32 GB hosts without disk swap: collect
+	// more often and make the GC work harder as the heap nears 24 GiB,
+	// instead of letting it grow to twice the live set.
+	debug.SetGCPercent(50)
+	debug.SetMemoryLimit(24 << 30)
 
 	if cmdlineArgs.Memprofile == "" {
 		// Go enables memory profile collection automatically if any references
